@@ -1,0 +1,78 @@
+* {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+}
+
+body{
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gameScreen{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(32, 32, 79, 0.4);
+    border: 3px solid red;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px red;
+    width: 100%;
+    max-width:400px;
+    margin:0 auto;
+    position: relative;
+}
+
+canvas{
+    background-color: rgba(0, 0, 0, 1);
+    border: 3px solid red;
+    border-radius: 8px;
+    display: block;
+    width: 100%;
+    height:auto;
+    max-width:400px;
+    margin: 0 auto;
+}
+
+#rules{
+    margin-bottom: 15px;
+    width: 100%;
+    color: white;
+}
+
+h1{
+    font-family: 'Tiny5', sans-serif; 
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin: 0 0 15px 0;
+    letter-spacing: 2px;
+    color: white;
+}
+
+#points{
+    font-family: 'Tiny5', sans-serif; 
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin: 0 0 15px 0;
+    letter-spacing: 2px;
+    color: white;
+}
+
+#coins{
+    font-family: 'Tiny5', sans-serif; 
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin: 0 0 15px 0;
+    letter-spacing: 2px;
+    color: white;
+}
+
+#scoreview{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
