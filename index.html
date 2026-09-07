@@ -4,9 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="https://play-lh.googleusercontent.com/sL7JspfSqlnrKVhvYJOb2WLeYZI8kiV62cyed6Sv5tX8J4NhoWRqkxgQGxqP-v1A59Tpfb7wgZ6slv37Ftlo">
+    <link rel="stylesheet" src="style.css">
     <title>Climb Knight</title>
 </head>
 <body>
-    
+    <div class="gameScreen">
+        <div id="name">
+            <h1>Climb Knight</h1>
+            <div id="scoreview">
+                <div id="points">Points: 0</div>
+                <div id="coins">Coins: 0</div>
+                <div id="sound-on-emoji">&#128266;</div>
+                <div id="sound-off-emoji">&#128263;</div>
+                <div id="heart-emoji">&#10084;&#65039;</div>
+                <div id="heart-emoji">&#10084;&#65039;</div>
+                <div id="heart-emoji">&#10084;&#65039;</div>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="400" height="600"></canvas>
+        <div id="rules">
+            <small>Instructions:</small>
+            <p>Use W S A D to move and climb</p>
+            <p>Press Space to jump</p>
+            <p>Climb Up,Collect coins and avoid hazards!</p>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
