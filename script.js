@@ -2,14 +2,8 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const knightImg = new Image();
-<<<<<<< HEAD
 knightImg.src = 'assets/knight_spritesheet.png';
 const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 5, gravity: 0.4, jumpStrength: -8, isGrounded: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
-=======
-knightImg.src = 'knight.png';
-
-const player = { x: 185, y: 500, width: 30, height: 35, vx: 0, vy: 0, speed: 5, gravity: 0.4, jumpStrength: -8, isGrounded: false };
->>>>>>> ec5335a4023966a2c97f50e6064699e299e6cc21
 
 const keys = {};
 
@@ -44,7 +38,6 @@ function update() {
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 
-<<<<<<< HEAD
     if (player.y + player.height >= 580) {
         player.y = 580 - player.height;
         player.vy = 0;
@@ -64,18 +57,10 @@ function update() {
         player.frameX = 0;
         player.frameTimer = 0;
     }
-=======
-    if (player.y + player.height >= 560) {
-        player.y = 560 - player.height;
-        player.vy = 0;
-        player.isGrounded = true;
-    }
->>>>>>> ec5335a4023966a2c97f50e6064699e299e6cc21
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-<<<<<<< HEAD
     ctx.fillStyle = '#5C4033';
     ctx.fillRect(0, 580, canvas.width, 20);
 
@@ -106,13 +91,6 @@ function draw() {
         }
         ctx.restore();
     }
-=======
-
-    ctx.fillStyle = 'slategrey';
-    ctx.fillRect(0, 560, canvas.width, 40);
-
-    ctx.drawImage(knightImg, player.x, player.y, player.width, player.height);
->>>>>>> ec5335a4023966a2c97f50e6064699e299e6cc21
 }
 
 function gameLoop() {
