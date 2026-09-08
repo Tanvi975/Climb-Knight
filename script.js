@@ -1,11 +1,17 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const bgMusic = document.getElementById('bg-music');
 
+bgMusic.volume = 0.5;
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
 const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 5, gravity: 0.4, jumpStrength: -8, isGrounded: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
 
 const keys = {};
+
+window.addEventListener('keydown', function startMusic() {
+    bgMusic.play();
+}, { once: true });
 
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
