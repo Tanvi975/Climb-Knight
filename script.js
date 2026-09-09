@@ -85,6 +85,7 @@ for (let i = 1; i < platforms.length; i++) {
 
 const ladderWidth = 34;
 const ladderMargin = 30;
+const minLadderDistance = 140;
 const ladders = [];
 
 const coinImg = new Image();
@@ -96,8 +97,22 @@ coinSound.src = 'assets/coin-music.mp3';
 const coinSize = 24;
 const coins = [];
 
-function getRandomLadderX() {
-    return ladderMargin + Math.random() * (platformWidth - ladderMargin * 2 - ladderWidth);
+function getRandomLadderX(prevX = null) {
+    const minX = ladderMargin;
+    const maxX = platformWidth - ladderMargin - ladderWidth;
+    
+    if (prevX === null) {
+        return minX + Math.random() * (maxX - minX);
+    }
+
+    let candidateX;
+    let attempts = 0;
+    do {
+        candidateX = minX + Math.random() * (maxX - minX);
+        attempts++;
+    } while (Math.abs(candidateX - prevX) < minLadderDistance && attempts < 50);
+
+    return candidateX;
 }
 
 for (let i = 0; i < platforms.length; i++) {
@@ -113,8 +128,9 @@ for (let i = 0; i < platforms.length; i++) {
 }
 
 for (let i = 1; i < platforms.length; i++) {
+    const prevLadderX = ladders.length > 0 ? ladders[ladders.length - 1].x : null;
     ladders.push({
-        x: getRandomLadderX(),
+        x: getRandomLadderX(prevLadderX),
         y: platforms[i].y,
         width: ladderWidth,
         height: verticalSpacing
@@ -306,8 +322,11 @@ function createNewPlatforms() {
         };
         platforms.push(newPlatform);
 
+        const lastLadder = ladders.reduce((highest, current) => current.y < highest.y ? current : highest, ladders[0]);
+        const prevLadderX = lastLadder ? lastLadder.x : null;
+
         ladders.push({
-            x: getRandomLadderX(),
+            x: getRandomLadderX(prevLadderX),
             y: newY,
             width: ladderWidth,
             height: verticalSpacing
@@ -462,9 +481,6 @@ function draw() {
             );
         }
         ctx.restore();
-    } else {
-        ctx.fillStyle = '#4169E1';
-        ctx.fillRect(player.x, player.y, player.width, player.height);
     }
 
     drawCoins();
