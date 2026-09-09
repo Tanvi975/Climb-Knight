@@ -6,18 +6,31 @@ bgMusic.volume = 0.5;
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
 const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 5, gravity: 0.5, jumpStrength: -8, isGrounded: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
+const monsterImg = new Image();
+monsterImg.src = 'assets/monster_spritesheet.png';
+const monsters = [];
 
 const platformHeight = 16;
 const verticalSpacing = 150;
 const platformGap = verticalSpacing;
 const platforms = [
     { x: 0, y: 500, width: 400, height: platformHeight },
-    { x: 0, y: 500 - verticalSpacing, width: 400, height: platformHeight },       
-    { x: 0, y: 500 - (verticalSpacing * 2), width: 400, height: platformHeight }, 
-    { x: 0, y: 500 - (verticalSpacing * 3), width: 400, height: platformHeight }, 
-    { x: 0, y: 500 - (verticalSpacing * 4), width: 400, height: platformHeight } 
+    { x: 0, y: 500 - verticalSpacing, width: 400, height: platformHeight },
+    { x: 0, y: 500 - (verticalSpacing * 2), width: 400, height: platformHeight },
+    { x: 0, y: 500 - (verticalSpacing * 3), width: 400, height: platformHeight },
+    { x: 0, y: 500 - (verticalSpacing * 4), width: 400, height: platformHeight }
 ];
-
+for (let platform of platforms) {
+    monsters.push({
+        x: 100,
+        y: platform.y - 50,
+        width: 50,
+        height: 50,
+        speed: 2,
+        direction: 1,
+        platform: platform
+    });
+}
 const keys = {};
 
 window.addEventListener('keydown', function startMusic() {
@@ -34,7 +47,24 @@ window.addEventListener('keyup', (e) => {
     if (e.code === 'Space') keys['Space'] = false;
 });
 
+function moveMonsters() {
+    for (let monster of monsters) {
+        let platform = monster.platform;
+        if (platform) {
+            monster.y = platform.y - monster.height;
+            monster.x += monster.speed * monster.direction;
+            if (monster.x + monster.width >= platform.x + platform.width) {
+                monster.direction = -1;
+            }
+            if (monster.x <= platform.x) {
+                monster.direction = 1;
+            }
+        }
+    }
+}
+
 function update() {
+    moveMonsters();
     if (keys['a'] || keys['A'] || keys['ArrowLeft']) {
         player.vx = -player.speed;
     } else if (keys['d'] || keys['D'] || keys['ArrowRight']) {
@@ -111,6 +141,17 @@ function createNewPlatforms() {
             width: 400,
             height: platformHeight
         });
+        platforms.push(newPlatform);
+
+        monsters.push({
+            x: 100,
+            y: newPlatform.y - 50,
+            width: 50,
+            height: 50,
+            speed: 2,
+            direction: 1,
+            platform: newPlatform
+        });
     }
 
     for (let i = platforms.length - 1; i >= 0; i--) {
@@ -155,6 +196,9 @@ function draw() {
             );
         }
         ctx.restore();
+    }
+    for (let monster of monsters) {
+        ctx.drawImage(monsterImg, monster.x, monster.y, monster.width, monster.height);
     }
 }
 
