@@ -3,11 +3,29 @@ const ctx = canvas.getContext('2d');
 const bgMusic = document.getElementById('bg-music');
 const coinDisplay = document.getElementById('coins');
 const pointsDisplay = document.getElementById('points');
+const startbtn = document.getElementById("start-button");
+const gamestart = document.getElementById("game-start");
 
+let isGameRunning = false;
 if (bgMusic) bgMusic.volume = 0.5;
 
 let coinScore = 0;
 let points = 0;
+
+if (startbtn) {
+    startbtn.addEventListener('click', () => {
+        if (isGameRunning) return;
+
+        isGameRunning = true;
+        gamestart.style.display = 'none'; 
+
+        if (bgMusic) {
+            bgMusic.play().catch(() => {});
+        }
+
+        requestAnimationFrame(gameLoop);
+    });
+}
 
 function updateScoreDisplay() {
     if (coinDisplay) coinDisplay.textContent = `Coins: ${coinScore}`;
