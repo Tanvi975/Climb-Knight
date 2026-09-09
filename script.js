@@ -31,8 +31,6 @@ const platformHeight = 16;
 const verticalSpacing = 150;
 const platformWidth = 400;
 
-const platformHeight = 16;
-const verticalSpacing = 150;
 const platformGap = verticalSpacing;
 const platforms = [
     { x: 0, y: 500, width: platformWidth, height: platformHeight },
