@@ -29,25 +29,48 @@ const player = {
 
 const platformHeight = 16;
 const verticalSpacing = 150;
-const platformGap = verticalSpacing;
+const platformWidth = 400;
 
 const platformHeight = 16;
 const verticalSpacing = 150;
 const platformGap = verticalSpacing;
 const platforms = [
-    { x: 0, y: 500, width: 400, height: platformHeight },
-    { x: 0, y: 500 - verticalSpacing, width: 400, height: platformHeight },
-    { x: 0, y: 500 - (verticalSpacing * 2), width: 400, height: platformHeight },
-    { x: 0, y: 500 - (verticalSpacing * 3), width: 400, height: platformHeight },
-    { x: 0, y: 500 - (verticalSpacing * 4), width: 400, height: platformHeight }
+    { x: 0, y: 500, width: platformWidth, height: platformHeight },
+    { x: 0, y: 500 - verticalSpacing, width: platformWidth, height: platformHeight },
+    { x: 0, y: 500 - (verticalSpacing * 2), width: platformWidth, height: platformHeight },
+    { x: 0, y: 500 - (verticalSpacing * 3), width: platformWidth, height: platformHeight },
+    { x: 0, y: 500 - (verticalSpacing * 4), width: platformWidth, height: platformHeight }
 ];
 
 const ladderWidth = 34;
+const ladderMargin = 30;
+const numZones = 5;
+const zoneWidth = (platformWidth - ladderMargin * 2 - ladderWidth) / numZones;
+
 const ladders = [];
+let recentZones = [];
+
+function getRandomLadderX() {
+    let availableZones = [];
+    for (let z = 0; z < numZones; z++) {
+        if (!recentZones.includes(z)) availableZones.push(z);
+    }
+    if (availableZones.length === 0) availableZones = [...Array(numZones).keys()];
+
+    const chosenZone = availableZones[Math.floor(Math.random() * availableZones.length)];
+
+    recentZones.push(chosenZone);
+    if (recentZones.length > 2) recentZones.shift();
+
+    const zoneStart = ladderMargin + chosenZone * zoneWidth;
+    const jitter = Math.random() * zoneWidth;
+
+    return zoneStart + jitter;
+}
 
 for (let i = 1; i < platforms.length; i++) {
     ladders.push({
-        x: 80 + ((i % 3) * 110),
+        x: getRandomLadderX(),
         y: platforms[i].y,
         width: ladderWidth,
         height: verticalSpacing
@@ -199,12 +222,12 @@ function createNewPlatforms() {
         platforms.push({
             x: 0,
             y: newY,
-            width: 400,
+            width: platformWidth,
             height: platformHeight
         });
 
         ladders.push({
-            x: 60 + Math.random() * (canvas.width - 120),
+            x: getRandomLadderX(),
             y: newY,
             width: ladderWidth,
             height: verticalSpacing
