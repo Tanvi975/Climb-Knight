@@ -5,16 +5,19 @@ const bgMusic = document.getElementById('bg-music');
 bgMusic.volume = 0.5;
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
-const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 5, gravity: 0.4, jumpStrength: -8, isGrounded: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
+const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 5, gravity: 0.5, jumpStrength: -8, isGrounded: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
 
+const platformHeight = 16;
+const verticalSpacing = 150;
+const platformGap = verticalSpacing;
 const platforms = [
-    { x: 0, y: 500, width: 400, height: 8 },
-    { x: 0, y: 400, width: 400, height: 8 },
-    { x: 0, y: 300, width: 400, height: 8 },
-    { x: 0, y: 200, width: 400, height: 8 }
+    { x: 0, y: 500, width: 400, height: platformHeight },
+    { x: 0, y: 500 - verticalSpacing, width: 400, height: platformHeight },       
+    { x: 0, y: 500 - (verticalSpacing * 2), width: 400, height: platformHeight }, 
+    { x: 0, y: 500 - (verticalSpacing * 3), width: 400, height: platformHeight }, 
+    { x: 0, y: 500 - (verticalSpacing * 4), width: 400, height: platformHeight } 
 ];
 
-const platformGap = 60;
 const keys = {};
 
 window.addEventListener('keydown', function startMusic() {
@@ -100,12 +103,20 @@ function update() {
 }
 
 function createNewPlatforms() {
-    let highestPlatform = platforms[platforms.length - 1];
+    let minPlatformY = Math.min(...platforms.map(p => p.y));
+    if (minPlatformY > 0) {
+        platforms.push({
+            x: 0,
+            y: minPlatformY - verticalSpacing,
+            width: 400,
+            height: platformHeight
+        });
+    }
 
-    if (highestPlatform.y > -platformGap) {
-        let newY = highestPlatform.y - platformGap;
-
-        platforms.push({ x: 0, y: newY, width: 400, height: 8 });
+    for (let i = platforms.length - 1; i >= 0; i--) {
+        if (platforms[i].y > canvas.height) {
+            platforms.splice(i, 1);
+        }
     }
 }
 
