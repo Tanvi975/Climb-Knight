@@ -17,25 +17,35 @@ function updateScoreDisplay() {
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
 
-const player = {
-    x: 185,
-    y: 500,
-    width: 60,
-    height: 60,
-    vx: 0,
-    vy: 0,
-    speed: 5,
-    climbSpeed: 4,
-    gravity: 0.5,
-    jumpStrength: -8,
-    isGrounded: false,
-    isClimbing: false,
-    frameX: 0,
-    maxFrame: 5,
-    frameTimer: 0,
-    frameInterval: 6,
-    facingRight: true
-};
+const player = {x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -8, isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true};
+
+const monsterImg = new Image();
+monsterImg.src = 'assets/monster_spritesheet.png';
+const monsters = [];
+
+function moveMonsters() {
+    for (let monster of monsters) {
+        let platform = monster.platform;
+        if (platform) {
+            monster.y = platform.y - monster.height;
+            monster.x += monster.speed * monster.direction;
+
+            if (monster.x + monster.width >= platform.x + platform.width) {
+                monster.x = platform.x + platform.width - monster.width;
+                monster.direction = -1;
+            } else if (monster.x <= platform.x) {
+                monster.x = platform.x;
+                monster.direction = 1;
+            }
+
+            monster.frameTimer++;
+            if (monster.frameTimer >= monster.frameInterval) {
+                monster.frameX = (monster.frameX + 1) % monster.walkFrames;
+                monster.frameTimer = 0;
+            }
+        }
+    }
+}
 
 const platformHeight = 16;
 const verticalSpacing = 150;
@@ -49,9 +59,32 @@ const platforms = [
     { x: 0, y: 500 - (verticalSpacing * 4), width: platformWidth, height: platformHeight, passed: false }
 ];
 
+function createMonster(platform) {
+    const size = 50;
+    return {
+        x: platform.x + Math.random() * (platform.width - size),
+        y: platform.y - size,
+        width: size,
+        height: size,
+        speed: 1,
+        direction: Math.random() < 0.5 ? 1 : -1,
+        platform: platform,
+        frameX: 0,
+        totalCols: 6,
+        walkFrames: 3,
+        frameTimer: 0,
+        frameInterval: 8,
+        changeDirTimer: 0,
+        changeDirInterval: 60 + Math.floor(Math.random() * 120)
+    };
+}
+
+for (let i = 1; i < platforms.length; i++) {
+    monsters.push(createMonster(platforms[i]));
+}
+
 const ladderWidth = 34;
 const ladderMargin = 30;
-
 const ladders = [];
 
 const coinImg = new Image();
@@ -105,6 +138,8 @@ window.addEventListener('keyup', (e) => {
 });
 
 function update() {
+    moveMonsters();
+
     if (keys['a'] || keys['A'] || keys['ArrowLeft']) {
         player.vx = -player.speed;
         player.facingRight = false;
@@ -262,13 +297,14 @@ function createNewPlatforms() {
     if (minPlatformY > 0) {
         let newY = minPlatformY - verticalSpacing;
 
-        platforms.push({
+        const newPlatform = {
             x: 0,
             y: newY,
             width: platformWidth,
             height: platformHeight,
             passed: false
-        });
+        };
+        platforms.push(newPlatform);
 
         ladders.push({
             x: getRandomLadderX(),
@@ -286,6 +322,8 @@ function createNewPlatforms() {
             frameTimer: 0,
             frameInterval: 6
         });
+
+        monsters.push(createMonster(newPlatform));
     }
 
     for (let i = platforms.length - 1; i >= 0; i--) {
@@ -303,6 +341,12 @@ function createNewPlatforms() {
     for (let i = coins.length - 1; i >= 0; i--) {
         if (coins[i].y > canvas.height) {
             coins.splice(i, 1);
+        }
+    }
+
+    for (let i = monsters.length - 1; i >= 0; i--) {
+        if (!platforms.includes(monsters[i].platform)) {
+            monsters.splice(i, 1);
         }
     }
 }
@@ -341,6 +385,43 @@ function drawCoins() {
     }
 }
 
+function drawMonsters() {
+    if (!monsterImg.complete || monsterImg.naturalWidth === 0) {
+        for (let monster of monsters) {
+            ctx.fillRect(monster.x, monster.y, monster.width, monster.height);
+        }
+        return;
+    }
+
+    for (let monster of monsters) {
+        const frameWidth = monsterImg.naturalWidth / monster.totalCols;
+        const frameHeight = monsterImg.naturalHeight;
+        const sourceX = monster.frameX * frameWidth;
+
+        ctx.save();
+        if (monster.direction === -1) {
+            ctx.translate(monster.x + monster.width, monster.y);
+            ctx.scale(-1, 1);
+            ctx.drawImage(
+                monsterImg,
+                sourceX, 0,
+                frameWidth, frameHeight,
+                0, 0,
+                monster.width, monster.height
+            );
+        } else {
+            ctx.drawImage(
+                monsterImg,
+                sourceX, 0,
+                frameWidth, frameHeight,
+                monster.x, monster.y,
+                monster.width, monster.height
+            );
+        }
+        ctx.restore();
+    }
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -353,6 +434,8 @@ function draw() {
     for (let platform of platforms) {
         ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
     }
+
+    drawMonsters();
 
     const frameWidth = knightImg.width / 6;
     const frameHeight = knightImg.height;
