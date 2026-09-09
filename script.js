@@ -1,8 +1,18 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const bgMusic = document.getElementById('bg-music');
+const coinDisplay = document.getElementById('coins');
+const pointsDisplay = document.getElementById('points');
 
 if (bgMusic) bgMusic.volume = 0.5;
+
+let coinScore = 0;
+let points = 0;
+
+function updateScoreDisplay() {
+    if (coinDisplay) coinDisplay.textContent = `Coins: ${coinScore}`;
+    if (pointsDisplay) pointsDisplay.textContent = `Points: ${points}`;
+}
 
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
@@ -31,22 +41,18 @@ const platformHeight = 16;
 const verticalSpacing = 150;
 const platformWidth = 400;
 
-const platformGap = verticalSpacing;
 const platforms = [
-    { x: 0, y: 500, width: platformWidth, height: platformHeight },
-    { x: 0, y: 500 - verticalSpacing, width: platformWidth, height: platformHeight },
-    { x: 0, y: 500 - (verticalSpacing * 2), width: platformWidth, height: platformHeight },
-    { x: 0, y: 500 - (verticalSpacing * 3), width: platformWidth, height: platformHeight },
-    { x: 0, y: 500 - (verticalSpacing * 4), width: platformWidth, height: platformHeight }
+    { x: 0, y: 500, width: platformWidth, height: platformHeight, passed: true }, 
+    { x: 0, y: 500 - verticalSpacing, width: platformWidth, height: platformHeight, passed: false },
+    { x: 0, y: 500 - (verticalSpacing * 2), width: platformWidth, height: platformHeight, passed: false },
+    { x: 0, y: 500 - (verticalSpacing * 3), width: platformWidth, height: platformHeight, passed: false },
+    { x: 0, y: 500 - (verticalSpacing * 4), width: platformWidth, height: platformHeight, passed: false }
 ];
 
 const ladderWidth = 34;
 const ladderMargin = 30;
-const numZones = 5;
-const zoneWidth = (platformWidth - ladderMargin * 2 - ladderWidth) / numZones;
 
 const ladders = [];
-let recentZones = [];
 
 const coinImg = new Image();
 coinImg.src = 'assets/coin_spritesheet.png';
@@ -54,9 +60,12 @@ coinImg.src = 'assets/coin_spritesheet.png';
 const coinSound = new Audio();
 coinSound.src = 'assets/coin-music.mp3';
 
-let coinScore = 0;
 const coinSize = 24;
 const coins = [];
+
+function getRandomLadderX() {
+    return ladderMargin + Math.random() * (platformWidth - ladderMargin * 2 - ladderWidth);
+}
 
 for (let i = 0; i < platforms.length; i++) {
     coins.push({
@@ -68,24 +77,6 @@ for (let i = 0; i < platforms.length; i++) {
         frameTimer: 0,
         frameInterval: 6
     });
-}
-
-function getRandomLadderX() {
-    let availableZones = [];
-    for (let z = 0; z < numZones; z++) {
-        if (!recentZones.includes(z)) availableZones.push(z);
-    }
-    if (availableZones.length === 0) availableZones = [...Array(numZones).keys()];
-
-    const chosenZone = availableZones[Math.floor(Math.random() * availableZones.length)];
-
-    recentZones.push(chosenZone);
-    if (recentZones.length > 2) recentZones.shift();
-
-    const zoneStart = ladderMargin + chosenZone * zoneWidth;
-    const jitter = Math.random() * zoneWidth;
-
-    return zoneStart + jitter;
 }
 
 for (let i = 1; i < platforms.length; i++) {
@@ -186,10 +177,17 @@ function update() {
 
         for (let platform of platforms) platform.y += scrollDelta;
         for (let ladder of ladders) ladder.y += scrollDelta;
+        for (let coin of coins) coin.y += scrollDelta;
     }
 
     player.isGrounded = false;
     for (let platform of platforms) {
+        if (!platform.passed && player.y + player.height < platform.y) {
+            platform.passed = true;
+            points++;
+            updateScoreDisplay();
+        }
+
         if (
             player.x < platform.x + platform.width &&
             player.x + player.width > platform.x &&
@@ -230,6 +228,31 @@ function update() {
         player.frameTimer = 0;
     }
 
+    for (let i = coins.length - 1; i >= 0; i--) {
+        let coin = coins[i];
+
+        coin.frameTimer++;
+        if (coin.frameTimer >= coin.frameInterval) {
+            coin.frameX = (coin.frameX + 1) % 7;
+            coin.frameTimer = 0;
+        }
+
+        if (
+            player.x < coin.x + coin.width &&
+            player.x + player.width > coin.x &&
+            player.y < coin.y + coin.height &&
+            player.y + player.height > coin.y
+        ) {
+            coinScore++;
+            points++;
+            updateScoreDisplay();
+
+            coinSound.currentTime = 0;
+            coinSound.play().catch(() => {});
+            coins.splice(i, 1);
+        }
+    }
+
     createNewPlatforms();
 }
 
@@ -243,7 +266,8 @@ function createNewPlatforms() {
             x: 0,
             y: newY,
             width: platformWidth,
-            height: platformHeight
+            height: platformHeight,
+            passed: false
         });
 
         ladders.push({
@@ -251,6 +275,16 @@ function createNewPlatforms() {
             y: newY,
             width: ladderWidth,
             height: verticalSpacing
+        });
+
+        coins.push({
+            x: 20 + Math.random() * (platformWidth - 40 - coinSize),
+            y: newY - coinSize - 4,
+            width: coinSize,
+            height: coinSize,
+            frameX: 0,
+            frameTimer: 0,
+            frameInterval: 6
         });
     }
 
@@ -265,6 +299,12 @@ function createNewPlatforms() {
             ladders.splice(i, 1);
         }
     }
+
+    for (let i = coins.length - 1; i >= 0; i--) {
+        if (coins[i].y > canvas.height) {
+            coins.splice(i, 1);
+        }
+    }
 }
 
 function drawLadders() {
@@ -275,6 +315,28 @@ function drawLadders() {
 
         for (let rungY = ladder.y + 16; rungY < ladder.y + ladder.height; rungY += 16) {
             ctx.fillRect(ladder.x, rungY, ladder.width, 3);
+        }
+    }
+}
+
+function drawCoins() {
+    const frameWidth = coinImg.width / 7;
+    const frameHeight = coinImg.height;
+
+    for (let coin of coins) {
+        if (frameWidth > 0 && coinImg.complete) {
+            ctx.drawImage(
+                coinImg,
+                coin.frameX * frameWidth, 0,
+                frameWidth, frameHeight,
+                coin.x, coin.y,
+                coin.width, coin.height
+            );
+        } else {
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(coin.x + coin.width / 2, coin.y + coin.height / 2, coin.width / 2, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 }
@@ -321,6 +383,8 @@ function draw() {
         ctx.fillStyle = '#4169E1';
         ctx.fillRect(player.x, player.y, player.width, player.height);
     }
+
+    drawCoins();
 }
 
 function gameLoop() {
@@ -329,4 +393,5 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+updateScoreDisplay();
 gameLoop();
