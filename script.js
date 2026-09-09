@@ -48,6 +48,28 @@ const zoneWidth = (platformWidth - ladderMargin * 2 - ladderWidth) / numZones;
 const ladders = [];
 let recentZones = [];
 
+const coinImg = new Image();
+coinImg.src = 'assets/coin_spritesheet.png';
+
+const coinSound = new Audio();
+coinSound.src = 'assets/coin-music.mp3';
+
+let coinScore = 0;
+const coinSize = 24;
+const coins = [];
+
+for (let i = 0; i < platforms.length; i++) {
+    coins.push({
+        x: 20 + Math.random() * (platformWidth - 40 - coinSize),
+        y: platforms[i].y - coinSize - 4,
+        width: coinSize,
+        height: coinSize,
+        frameX: 0,
+        frameTimer: 0,
+        frameInterval: 6
+    });
+}
+
 function getRandomLadderX() {
     let availableZones = [];
     for (let z = 0; z < numZones; z++) {
