@@ -17,7 +17,7 @@ if (startbtn) {
         if (isGameRunning) return;
 
         isGameRunning = true;
-        gamestart.style.display = 'none'; 
+        gamestart.style.display = 'none';
 
         if (bgMusic) {
             bgMusic.play().catch(() => {});
@@ -35,7 +35,7 @@ function updateScoreDisplay() {
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
 
-const player = {x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -8, isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true};
+const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -10, isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
 
 const monsterImg = new Image();
 monsterImg.src = 'assets/monster_spritesheet.png';
@@ -70,7 +70,7 @@ const verticalSpacing = 150;
 const platformWidth = 400;
 
 const platforms = [
-    { x: 0, y: 500, width: platformWidth, height: platformHeight, passed: true }, 
+    { x: 0, y: 500, width: platformWidth, height: platformHeight, passed: true },
     { x: 0, y: 500 - verticalSpacing, width: platformWidth, height: platformHeight, passed: false },
     { x: 0, y: 500 - (verticalSpacing * 2), width: platformWidth, height: platformHeight, passed: false },
     { x: 0, y: 500 - (verticalSpacing * 3), width: platformWidth, height: platformHeight, passed: false },
@@ -118,7 +118,7 @@ const coins = [];
 function getRandomLadderX(prevX = null) {
     const minX = ladderMargin;
     const maxX = platformWidth - ladderMargin - ladderWidth;
-    
+
     if (prevX === null) {
         return minX + Math.random() * (maxX - minX);
     }
@@ -264,9 +264,9 @@ function update() {
             player.y + player.height <= platform.y + platform.height + 10 &&
             player.vy >= 0
         ) {
-            const hasLadderBelow = ladders.some(l => 
-                player.x + player.width > l.x && 
-                player.x < l.x + l.width && 
+            const hasLadderBelow = ladders.some(l =>
+                player.x + player.width > l.x &&
+                player.x < l.x + l.width &&
                 Math.abs(l.y - platform.y) < 5
             );
 
