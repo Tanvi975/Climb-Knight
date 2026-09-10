@@ -43,7 +43,7 @@ function updateScoreDisplay() {
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
 
-const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -8, isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
+const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -8.5, jumpHorizontalBoost: 4.5,isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
 
 const monsterImg = new Image();
 monsterImg.src = 'assets/monster_spritesheet.png';
@@ -151,8 +151,15 @@ for (let i = 0; i < platforms.length; i++) {
     });
 }
 
+ladders.push({
+    x: getRandomLadderX(null),
+    y: platforms[0].y,
+    width: ladderWidth,
+    height: 580 - platforms[0].y
+});
+
 for (let i = 1; i < platforms.length; i++) {
-    const prevLadderX = ladders.length > 0 ? ladders[ladders.length - 1].x : null;
+    const prevLadderX = ladders[ladders.length - 1].x;
     ladders.push({
         x: getRandomLadderX(prevLadderX),
         y: platforms[i].y,
@@ -169,11 +176,13 @@ window.addEventListener('keydown', function startMusic() {
 
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
+    keys[e.key.toLowerCase()] = true;
     if (e.code === 'Space') keys['Space'] = true;
 });
 
 window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
+    keys[e.key.toLowerCase()] = false;
     if (e.code === 'Space') keys['Space'] = false;
 });
 
@@ -226,14 +235,19 @@ function update() {
     moveMonsters();
     checkMonsterCollisions();
 
-    if (keys['a'] || keys['A'] || keys['ArrowLeft']) {
-        player.vx = -player.speed;
-        player.facingRight = false;
-    } else if (keys['d'] || keys['D'] || keys['ArrowRight']) {
-        player.vx = player.speed;
-        player.facingRight = true;
-    } else {
-        player.vx = 0;
+    const moveLeft = keys['a'] || keys['ArrowLeft'];
+    const moveRight = keys['d'] || keys['ArrowRight'];
+
+    if (player.isGrounded) {
+        if (moveLeft) {
+            player.vx = -player.speed;
+            player.facingRight = false;
+        } else if (moveRight) {
+            player.vx = player.speed;
+            player.facingRight = true;
+        } else {
+            player.vx = 0;
+        }
     }
 
     let touchingLadder = null;
@@ -249,8 +263,8 @@ function update() {
         }
     }
 
-    const wantsToClimbUp = keys['w'] || keys['W'] || keys['ArrowUp'];
-    const wantsToClimbDown = keys['s'] || keys['S'] || keys['ArrowDown'];
+    const wantsToClimbUp = keys['w'] || keys['ArrowUp'];
+    const wantsToClimbDown = keys['s'] || keys['ArrowDown'];
 
     if (touchingLadder && (wantsToClimbUp || wantsToClimbDown)) {
         player.isClimbing = true;
@@ -276,12 +290,40 @@ function update() {
 
         if (keys['Space']) {
             player.vy = player.jumpStrength;
+            player.vx = 0;
+            player.isClimbing = false;
+        } else if (keys['j']) {
+            player.vy = player.jumpStrength;
+            player.vx = -player.jumpHorizontalBoost;
+            player.facingRight = false;
+            player.isClimbing = false;
+        } else if (keys['k']) {
+            player.vy = player.jumpStrength;
+            player.vx = player.jumpHorizontalBoost;
+            player.facingRight = true;
             player.isClimbing = false;
         }
     } else {
-        if ((wantsToClimbUp || keys['Space']) && player.isGrounded) {
-            player.vy = player.jumpStrength;
-            player.isGrounded = false;
+        if (player.isGrounded) {
+            if (keys['Space']) {
+                player.vy = player.jumpStrength;
+                player.vx = 0;
+                player.isGrounded = false;
+            } else if (keys['j']) {
+                player.vy = player.jumpStrength;
+                player.vx = -player.jumpHorizontalBoost;
+                player.facingRight = false;
+                player.isGrounded = false;
+            } else if (keys['k']) {
+                player.vy = player.jumpStrength;
+                player.vx = player.jumpHorizontalBoost;
+                player.facingRight = true;
+                player.isGrounded = false;
+            } else if (wantsToClimbUp) {
+                player.vy = player.jumpStrength;
+                player.vx = 0;
+                player.isGrounded = false;
+            }
         }
         player.vy += player.gravity;
     }
@@ -289,8 +331,14 @@ function update() {
     player.x += player.vx;
     player.y += player.vy;
 
-    if (player.x < 0) player.x = 0;
-    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    if (player.x < 0) {
+        player.x = 0;
+        player.vx = 0;
+    }
+    if (player.x + player.width > canvas.width) {
+        player.x = canvas.width - player.width;
+        player.vx = 0;
+    }
 
     if (player.y < 200) {
         const scrollDelta = 200 - player.y;
@@ -303,10 +351,16 @@ function update() {
 
     player.isGrounded = false;
     for (let platform of platforms) {
-        if (!platform.passed && player.y + player.height < platform.y) {
-            platform.passed = true;
-            points++;
-            updateScoreDisplay();
+        if (
+            !player.isClimbing &&
+            player.vy < 0 &&
+            player.x < platform.x + platform.width &&
+            player.x + player.width > platform.x &&
+            player.y <= platform.y + platform.height &&
+            player.y >= platform.y
+        ) {
+            player.y = platform.y + platform.height;
+            player.vy = 0;
         }
 
         if (
@@ -325,6 +379,7 @@ function update() {
             if (!player.isClimbing || !hasLadderBelow) {
                 player.y = platform.y - player.height;
                 player.vy = 0;
+                player.vx = 0;
                 player.isGrounded = true;
                 player.isClimbing = false;
             }
@@ -334,11 +389,20 @@ function update() {
     if (player.y + player.height >= 580) {
         player.y = 580 - player.height;
         player.vy = 0;
+        player.vx = 0;
         player.isGrounded = true;
         player.isClimbing = false;
     }
 
-    if ((player.vx !== 0 && player.isGrounded) || (player.isClimbing && player.vy !== 0)) {
+    for (let platform of platforms) {
+        if (!platform.passed && player.isClimbing && player.y + player.height < platform.y) {
+            platform.passed = true;
+            points++;
+            updateScoreDisplay();
+        }
+    }
+
+    if ((player.vx !== 0 && player.isGrounded) || (player.isClimbing && player.vy !== 0) || !player.isGrounded) {
         player.frameTimer++;
         if (player.frameTimer >= player.frameInterval) {
             player.frameX = (player.frameX + 1) % (player.maxFrame + 1);
@@ -459,8 +523,6 @@ function drawCoins() {
 }
 
 function drawMonsters() {
-    
-
     for (let monster of monsters) {
         const frameWidth = monsterImg.naturalWidth / monster.totalCols;
         const frameHeight = monsterImg.naturalHeight;
