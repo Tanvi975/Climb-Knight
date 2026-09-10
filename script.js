@@ -3,20 +3,25 @@ const ctx = canvas.getContext('2d');
 const bgMusic = document.getElementById('bg-music');
 const coinDisplay = document.getElementById('coins');
 const pointsDisplay = document.getElementById('points');
+const heartsDisplay = document.getElementById('heart-emoji');
 const startbtn = document.getElementById("start-button");
 const gamestart = document.getElementById("game-start");
 
 let isGameRunning = false;
+let isGameOver = false;
 if (bgMusic) bgMusic.volume = 0.5;
 
 let coinScore = 0;
 let points = 0;
+let lives = 3;
+let invulnerableTimer = 0;
 
 if (startbtn) {
     startbtn.addEventListener('click', () => {
         if (isGameRunning) return;
 
         isGameRunning = true;
+        isGameOver = false;
         gamestart.style.display = 'none';
 
         if (bgMusic) {
@@ -30,12 +35,15 @@ if (startbtn) {
 function updateScoreDisplay() {
     if (coinDisplay) coinDisplay.textContent = `Coins: ${coinScore}`;
     if (pointsDisplay) pointsDisplay.textContent = `Points: ${points}`;
+    if (heartsDisplay) {
+        heartsDisplay.innerHTML = '&#10084;&#65039; '.repeat(Math.max(0, lives)).trim();
+    }
 }
 
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
 
-const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -10, isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
+const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -8, isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
 
 const monsterImg = new Image();
 monsterImg.src = 'assets/monster_spritesheet.png';
@@ -91,9 +99,7 @@ function createMonster(platform) {
         totalCols: 6,
         walkFrames: 3,
         frameTimer: 0,
-        frameInterval: 8,
-        changeDirTimer: 0,
-        changeDirInterval: 60 + Math.floor(Math.random() * 120)
+        frameInterval: 8
     };
 }
 
@@ -171,8 +177,54 @@ window.addEventListener('keyup', (e) => {
     if (e.code === 'Space') keys['Space'] = false;
 });
 
+function checkMonsterCollisions() {
+    if (invulnerableTimer > 0) {
+        invulnerableTimer--;
+        return;
+    }
+
+    const padding = 10;
+    const pBox = {
+        x: player.x + padding,
+        y: player.y + padding,
+        w: player.width - padding * 2,
+        h: player.height - padding * 2
+    };
+
+    for (let monster of monsters) {
+        if (
+            pBox.x < monster.x + monster.width &&
+            pBox.x + pBox.w > monster.x &&
+            pBox.y < monster.y + monster.height &&
+            pBox.y + pBox.h > monster.y
+        ) {
+            lives--;
+            updateScoreDisplay();
+            invulnerableTimer = 60;
+            player.vy = -5;
+
+            if (lives <= 0) {
+                triggerGameOver();
+            }
+            break;
+        }
+    }
+}
+
+function triggerGameOver() {
+    isGameOver = true;
+    isGameRunning = false;
+    if (bgMusic) {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+    }
+}
+
 function update() {
+    if (isGameOver) return;
+
     moveMonsters();
+    checkMonsterCollisions();
 
     if (keys['a'] || keys['A'] || keys['ArrowLeft']) {
         player.vx = -player.speed;
@@ -364,27 +416,16 @@ function createNewPlatforms() {
     }
 
     for (let i = platforms.length - 1; i >= 0; i--) {
-        if (platforms[i].y > canvas.height) {
-            platforms.splice(i, 1);
-        }
+        if (platforms[i].y > canvas.height) platforms.splice(i, 1);
     }
-
     for (let i = ladders.length - 1; i >= 0; i--) {
-        if (ladders[i].y > canvas.height) {
-            ladders.splice(i, 1);
-        }
+        if (ladders[i].y > canvas.height) ladders.splice(i, 1);
     }
-
     for (let i = coins.length - 1; i >= 0; i--) {
-        if (coins[i].y > canvas.height) {
-            coins.splice(i, 1);
-        }
+        if (coins[i].y > canvas.height) coins.splice(i, 1);
     }
-
     for (let i = monsters.length - 1; i >= 0; i--) {
-        if (!platforms.includes(monsters[i].platform)) {
-            monsters.splice(i, 1);
-        }
+        if (!platforms.includes(monsters[i].platform)) monsters.splice(i, 1);
     }
 }
 
@@ -413,22 +454,12 @@ function drawCoins() {
                 coin.x, coin.y,
                 coin.width, coin.height
             );
-        } else {
-            ctx.fillStyle = '#FFD700';
-            ctx.beginPath();
-            ctx.arc(coin.x + coin.width / 2, coin.y + coin.height / 2, coin.width / 2, 0, Math.PI * 2);
-            ctx.fill();
         }
     }
 }
 
 function drawMonsters() {
-    if (!monsterImg.complete || monsterImg.naturalWidth === 0) {
-        for (let monster of monsters) {
-            ctx.fillRect(monster.x, monster.y, monster.width, monster.height);
-        }
-        return;
-    }
+    
 
     for (let monster of monsters) {
         const frameWidth = monsterImg.naturalWidth / monster.totalCols;
@@ -459,6 +490,22 @@ function drawMonsters() {
     }
 }
 
+function drawGameOver() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#FF4444';
+    ctx.font = 'bold 50px "Tiny5", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('GAME OVER!!!', canvas.width / 2, canvas.height / 2 - 20);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '24px "Tiny5", sans-serif';
+    ctx.fillText(`Final Points: ${points}`, canvas.width / 2, canvas.height / 2 + 20);
+    ctx.fillText(`Coins Collected: ${coinScore}`, canvas.width / 2, canvas.height / 2 + 50);
+    ctx.fillText('Reload page to play again', canvas.width / 2, canvas.height / 2 + 80);
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -474,41 +521,50 @@ function draw() {
 
     drawMonsters();
 
-    const frameWidth = knightImg.width / 6;
-    const frameHeight = knightImg.height;
+    if (invulnerableTimer % 6 < 3) {
+        const frameWidth = knightImg.width / 6;
+        const frameHeight = knightImg.height;
 
-    if (frameWidth > 0 && knightImg.complete) {
-        ctx.save();
-        if (!player.facingRight) {
-            ctx.translate(player.x + player.width, player.y);
-            ctx.scale(-1, 1);
-            ctx.drawImage(
-                knightImg,
-                player.frameX * frameWidth, 0,
-                frameWidth, frameHeight,
-                0, 0,
-                player.width, player.height
-            );
-        } else {
-            ctx.drawImage(
-                knightImg,
-                player.frameX * frameWidth, 0,
-                frameWidth, frameHeight,
-                player.x, player.y,
-                player.width, player.height
-            );
+        if (frameWidth > 0 && knightImg.complete) {
+            ctx.save();
+            if (!player.facingRight) {
+                ctx.translate(player.x + player.width, player.y);
+                ctx.scale(-1, 1);
+                ctx.drawImage(
+                    knightImg,
+                    player.frameX * frameWidth, 0,
+                    frameWidth, frameHeight,
+                    0, 0,
+                    player.width, player.height
+                );
+            } else {
+                ctx.drawImage(
+                    knightImg,
+                    player.frameX * frameWidth, 0,
+                    frameWidth, frameHeight,
+                    player.x, player.y,
+                    player.width, player.height
+                );
+            }
+            ctx.restore();
         }
-        ctx.restore();
     }
 
     drawCoins();
+
+    if (isGameOver) {
+        drawGameOver();
+    }
 }
 
 function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
+    if (!isGameOver) {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    } else {
+        draw();
+    }
 }
 
 updateScoreDisplay();
-gameLoop();
