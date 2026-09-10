@@ -6,8 +6,23 @@ const pointsDisplay = document.getElementById('points');
 const heartsDisplay = document.getElementById('heart-emoji');
 const startbtn = document.getElementById("start-button");
 const gamestart = document.getElementById("game-start");
+const instructionBtn = document.getElementById("instruction-button");
+const instructions = document.getElementById("instructions");
+const closeInstruction = document.getElementById("close-instruction");
 const gameend = document.getElementById("game-restart");
-const restartbtn = document.getElementById("restart")
+const restartbtn = document.getElementById("restart");
+
+if (instructionBtn) {
+    instructionBtn.addEventListener("click", () => {
+        instructions.style.display = "block";
+    });
+}
+
+if (closeInstruction) {
+    closeInstruction.addEventListener("click", () => {
+        instructions.style.display = "none";
+    });
+}
 
 let isGameRunning = false;
 let isGameOver = false;
@@ -33,6 +48,7 @@ if (startbtn) {
 
         isGameRunning = true;
         isGameOver = false;
+        instructions.style.display = "none";
         gamestart.style.display = 'none';
         if (bgMusic) {
             bgMusic.play().catch(() => {});
@@ -53,7 +69,7 @@ function updateScoreDisplay() {
 const knightImg = new Image();
 knightImg.src = 'assets/knight_spritesheet.png';
 
-const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -8.5, jumpHorizontalBoost: 4.5,isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
+const player = { x: 185, y: 500, width: 60, height: 60, vx: 0, vy: 0, speed: 4, climbSpeed: 3, gravity: 0.5, jumpStrength: -8.5, jumpHorizontalBoost: 4.5, isGrounded: false, isClimbing: false, frameX: 0, maxFrame: 5, frameTimer: 0, frameInterval: 6, facingRight: true };
 
 const monsterImg = new Image();
 monsterImg.src = 'assets/monster_spritesheet.png';
@@ -361,8 +377,7 @@ function update() {
 
     player.isGrounded = false;
     for (let platform of platforms) {
-        if (
-            !player.isClimbing &&
+        if (!player.isClimbing &&
             player.vy < 0 &&
             player.x < platform.x + platform.width &&
             player.x + player.width > platform.x &&
