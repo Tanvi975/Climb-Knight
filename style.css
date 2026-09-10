@@ -1,17 +1,42 @@
 * {
-   margin: 0;
-   padding: 0;
-   box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body{
+body {
     background-color: black;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.gameScreen{
+#instructions {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    padding: 20px;
+    background-color: black;
+    border: 3px solid red;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    z-index: 20;
+}
+
+#instruction-button {
+    font-family: 'Tiny5', sans-serif;
+    font-size: 1.5em;
+    padding: 12px 24px;
+    margin-top: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.gameScreen {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -22,30 +47,30 @@ body{
     border-radius: 12px;
     box-shadow: 0 0 20px red;
     width: 100%;
-    max-width:400px;
-    margin:0 auto;
+    max-width: 400px;
+    margin: 0 auto;
     position: relative;
 }
 
-canvas{
+canvas {
     background-color: rgba(0, 0, 0, 1);
     border: 3px solid red;
     border-radius: 8px;
     display: block;
     width: 100%;
-    height:auto;
-    max-width:400px;
+    height: auto;
+    max-width: 400px;
     margin: 0 auto;
 }
 
-#rules{
+#rules {
     margin-bottom: 15px;
     width: 100%;
     color: white;
 }
 
-h1{
-    font-family: 'Tiny5', sans-serif; 
+h1 {
+    font-family: 'Tiny5', sans-serif;
     font-size: 3.5rem;
     font-weight: 900;
     margin: 0 0 15px 0;
@@ -53,8 +78,8 @@ h1{
     color: white;
 }
 
-#points{
-    font-family: 'Tiny5', sans-serif; 
+#points {
+    font-family: 'Tiny5', sans-serif;
     font-size: 1.5rem;
     font-weight: 900;
     margin: 0 0 15px 0;
@@ -62,8 +87,8 @@ h1{
     color: white;
 }
 
-#coins{
-    font-family: 'Tiny5', sans-serif; 
+#coins {
+    font-family: 'Tiny5', sans-serif;
     font-size: 1.5rem;
     font-weight: 900;
     margin: 0 0 15px 0;
@@ -71,26 +96,26 @@ h1{
     color: white;
 }
 
-#scoreview{
+#scoreview {
     display: flex;
     justify-content: center;
     gap: 20px;
 }
 
 #game-start {
-  position: absolute;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  z-index: 10;
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 10;
 }
 
-#text{
-    font-family: 'Tiny5', sans-serif; 
+#text {
+    font-family: 'Tiny5', sans-serif;
     font-weight: 900;
     margin: 0 0 15px 0;
     letter-spacing: 2px;
@@ -98,46 +123,46 @@ h1{
 }
 
 #start-button {
-  font-family: 'Tiny5', sans-serif;
-  font-size: 1.5em;
-  padding: 12px 24px;
-  background-color: rgba(34, 139, 34, 1);
-  color: rgba(255, 255, 255, 0.9);
-  border: 3px solid rgba(0, 100, 0, 1);
-  border-radius: 8px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: background-color 0.2s ease;
+    font-family: 'Tiny5', sans-serif;
+    font-size: 1.5em;
+    padding: 12px 24px;
+    background-color: rgba(34, 139, 34, 1);
+    color: rgba(255, 255, 255, 0.9);
+    border: 3px solid rgba(0, 100, 0, 1);
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease;
 }
 
 #start-button:hover {
-  background-color: rgba(50, 205, 50, 1);
+    background-color: rgba(50, 205, 50, 1);
 }
 
 #game-restart {
-  position: absolute;
-  left: 50%;
-  bottom: 25%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
+    position: absolute;
+    left: 50%;
+    bottom: 25%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
 }
 
-#restart{
-  font-family: 'Tiny5', sans-serif;
-  font-size: 1.5em;
-  padding: 12px 24px;
-  background-color: rgba(34, 139, 34, 1);
-  color: rgba(255, 255, 255, 0.9);
-  border: 3px solid rgba(0, 100, 0, 1);
-  border-radius: 8px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: background-color 0.2s ease;
+#restart {
+    font-family: 'Tiny5', sans-serif;
+    font-size: 1.5em;
+    padding: 12px 24px;
+    background-color: rgba(34, 139, 34, 1);
+    color: rgba(255, 255, 255, 0.9);
+    border: 3px solid rgba(0, 100, 0, 1);
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease;
 }
 
 #restart:hover {
-  background-color: rgba(50, 205, 50, 1);
+    background-color: rgba(50, 205, 50, 1);
 }
