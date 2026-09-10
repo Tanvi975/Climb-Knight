@@ -6,6 +6,8 @@ const pointsDisplay = document.getElementById('points');
 const heartsDisplay = document.getElementById('heart-emoji');
 const startbtn = document.getElementById("start-button");
 const gamestart = document.getElementById("game-start");
+const gameend = document.getElementById("game-restart");
+const restartbtn = document.getElementById("restart")
 
 let isGameRunning = false;
 let isGameOver = false;
@@ -16,6 +18,15 @@ let points = 0;
 let lives = 3;
 let invulnerableTimer = 0;
 
+gameend.style.display = 'none';
+restartbtn.style.display = 'none';
+
+if (restartbtn) {
+    restartbtn.addEventListener('click', () => {
+        window.location.reload();
+    });
+}
+
 if (startbtn) {
     startbtn.addEventListener('click', () => {
         if (isGameRunning) return;
@@ -23,7 +34,6 @@ if (startbtn) {
         isGameRunning = true;
         isGameOver = false;
         gamestart.style.display = 'none';
-
         if (bgMusic) {
             bgMusic.play().catch(() => {});
         }
@@ -565,7 +575,8 @@ function drawGameOver() {
     ctx.font = '24px "Tiny5", sans-serif';
     ctx.fillText(`Final Points: ${points}`, canvas.width / 2, canvas.height / 2 + 20);
     ctx.fillText(`Coins Collected: ${coinScore}`, canvas.width / 2, canvas.height / 2 + 50);
-    ctx.fillText('Reload page to play again', canvas.width / 2, canvas.height / 2 + 80);
+    gameend.style.display = 'block';
+    restartbtn.style.display = 'block';
 }
 
 function draw() {
