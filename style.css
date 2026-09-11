@@ -20,7 +20,7 @@ body {
     width: 320px;
     padding: 20px;
     background-color: black;
-    border: 3px solid red;
+    border: 3px solid #d4af37;
     border-radius: 10px;
     color: white;
     text-align: center;
@@ -36,16 +36,33 @@ body {
     cursor: pointer;
 }
 
+#music-button {
+    font-family: 'Tiny5', sans-serif;
+    font-size: 1em;
+    padding: 6px 18px;
+    background-color: black;
+    color: white;
+    border: 2px solid white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+#music-button:hover {
+    background-color: white;
+    color: black;
+}
+
 .gameScreen {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     background-color: rgba(32, 32, 79, 0.4);
-    border: 3px solid red;
+    border: 3px solid #d4af37;
     padding: 15px;
     border-radius: 12px;
-    box-shadow: 0 0 20px red;
+    box-shadow: 0 0 20px #d4af37;
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
@@ -54,7 +71,7 @@ body {
 
 canvas {
     background-color: rgba(0, 0, 0, 1);
-    border: 3px solid red;
+    border: 3px solid #d4af37;
     border-radius: 8px;
     display: block;
     width: 100%;
@@ -99,7 +116,13 @@ h1 {
 #scoreview {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 20px;
+    width: 100%;
+}
+
+#heart-emoji {
+    white-space: nowrap;
 }
 
 #game-start {

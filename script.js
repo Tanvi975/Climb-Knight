@@ -9,6 +9,7 @@ const gamestart = document.getElementById("game-start");
 const instructionBtn = document.getElementById("instruction-button");
 const instructions = document.getElementById("instructions");
 const closeInstruction = document.getElementById("close-instruction");
+const musicButton = document.getElementById("music-button");
 const gameend = document.getElementById("game-restart");
 const restartbtn = document.getElementById("restart");
 
@@ -32,6 +33,7 @@ let coinScore = 0;
 let points = 0;
 let lives = 3;
 let invulnerableTimer = 0;
+let musicOn = true;
 
 gameend.style.display = 'none';
 restartbtn.style.display = 'none';
@@ -50,11 +52,24 @@ if (startbtn) {
         isGameOver = false;
         instructions.style.display = "none";
         gamestart.style.display = 'none';
-        if (bgMusic) {
+        if (musicOn && bgMusic) {
             bgMusic.play().catch(() => {});
         }
 
         requestAnimationFrame(gameLoop);
+    });
+}
+if (musicButton) {
+    musicButton.addEventListener("click", () => {
+        if (musicOn) {
+            bgMusic.pause();
+            musicOn = false;
+            musicButton.textContent = "Music OFF";
+        } else {
+            bgMusic.play();
+            musicOn = true;
+            musicButton.textContent = "Music ON";
+        }
     });
 }
 
@@ -196,9 +211,6 @@ for (let i = 1; i < platforms.length; i++) {
 
 const keys = {};
 
-window.addEventListener('keydown', function startMusic() {
-    if (bgMusic) bgMusic.play().catch(() => {});
-}, { once: true });
 
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
