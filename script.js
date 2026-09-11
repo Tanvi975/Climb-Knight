@@ -230,7 +230,7 @@ function checkMonsterCollisions() {
         return;
     }
 
-    const padding = 10;
+    const padding = 15;
     const pBox = {
         x: player.x + padding,
         y: player.y + padding,
