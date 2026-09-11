@@ -596,12 +596,14 @@ function drawGameOver() {
     ctx.fillStyle = '#FF4444';
     ctx.font = 'bold 50px "Tiny5", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('GAME OVER!!!', canvas.width / 2, canvas.height / 2 - 20);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('GAME OVER!!!', canvas.width / 2, canvas.height / 2 - 90);
 
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '24px "Tiny5", sans-serif';
-    ctx.fillText(`Final Points: ${points}`, canvas.width / 2, canvas.height / 2 + 20);
-    ctx.fillText(`Coins Collected: ${coinScore}`, canvas.width / 2, canvas.height / 2 + 50);
+    ctx.fillText(`Final Points: ${points}`, canvas.width / 2, canvas.height / 2 - 30);
+    ctx.fillText(`Coins Collected: ${coinScore}`, canvas.width / 2, canvas.height / 2 + 5);
+
     gameend.style.display = 'block';
     restartbtn.style.display = 'block';
 }
