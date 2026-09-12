@@ -12,6 +12,7 @@ const closeInstruction = document.getElementById("close-instruction");
 const musicButton = document.getElementById("music-button");
 const gameend = document.getElementById("game-restart");
 const restartbtn = document.getElementById("restart");
+const bombSound = new Audio('assets/bomb-collision.mp3');
 
 if (instructionBtn) {
     instructionBtn.addEventListener("click", () => {
@@ -281,13 +282,17 @@ function checkBombCollisions() {
     if (invulnerableTimer > 0) return;
 
     const padding = 15;
-    for (let bomb of bombs) {
+
+    for (let i = bombs.length - 1; i >= 0; i--) {
+        const bomb = bombs[i];
+
         const pBox = {
             x: player.x + padding,
             y: player.y + padding,
             width: player.width - padding * 2,
             height: player.height - padding * 2
         };
+
         if (
             pBox.x < bomb.x + bomb.width &&
             pBox.x + pBox.width > bomb.x &&
@@ -297,12 +302,18 @@ function checkBombCollisions() {
             lives--;
             updateScoreDisplay();
 
+            bombSound.currentTime = 0;
+            bombSound.play().catch(() => {});
+
+            bombs.splice(i, 1);
+
             invulnerableTimer = 60;
             player.vy = -5;
 
             if (lives <= 0) {
                 triggerGameOver();
             }
+
             break;
         }
     }
