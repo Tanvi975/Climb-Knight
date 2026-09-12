@@ -90,6 +90,10 @@ const monsterImg = new Image();
 monsterImg.src = 'assets/monster_spritesheet.png';
 const monsters = [];
 
+const bombImg = new Image();
+bombImg.src = 'assets/bomb_spritesheet.png';
+const bombs = [];
+
 function moveMonsters() {
     for (let monster of monsters) {
         let platform = monster.platform;
@@ -126,6 +130,18 @@ const platforms = [
     { x: 0, y: 500 - (verticalSpacing * 4), width: platformWidth, height: platformHeight, passed: false }
 ];
 
+function createBomb(platform) {
+    const bombSize = 35;
+
+    bombs.push({
+        x: platform.x + Math.random() * (platform.width - bombSize),
+        y: platform.y - bombSize,
+        width: bombSize,
+        height: bombSize,
+        platform: platform
+    });
+}
+
 function createMonster(platform) {
     const size = 50;
     return {
@@ -146,6 +162,9 @@ function createMonster(platform) {
 
 for (let i = 1; i < platforms.length; i++) {
     monsters.push(createMonster(platforms[i]));
+    if (Math.random() < 0.5) {
+        createBomb(platforms[i]);
+    }
 }
 
 const ladderWidth = 34;
@@ -258,6 +277,37 @@ function checkMonsterCollisions() {
     }
 }
 
+function checkBombCollisions() {
+    if (invulnerableTimer > 0) return;
+
+    const padding = 15;
+    for (let bomb of bombs) {
+        const pBox = {
+            x: player.x + padding,
+            y: player.y + padding,
+            width: player.width - padding * 2,
+            height: player.height - padding * 2
+        };
+        if (
+            pBox.x < bomb.x + bomb.width &&
+            pBox.x + pBox.width > bomb.x &&
+            pBox.y < bomb.y + bomb.height &&
+            pBox.y + pBox.height > bomb.y
+        ) {
+            lives--;
+            updateScoreDisplay();
+
+            invulnerableTimer = 60;
+            player.vy = -5;
+
+            if (lives <= 0) {
+                triggerGameOver();
+            }
+            break;
+        }
+    }
+}
+
 function triggerGameOver() {
     isGameOver = true;
     isGameRunning = false;
@@ -270,8 +320,13 @@ function triggerGameOver() {
 function update() {
     if (isGameOver) return;
 
+    for (let bomb of bombs) {
+        bomb.y = bomb.platform.y - bomb.height;
+    }
+
     moveMonsters();
     checkMonsterCollisions();
+    checkBombCollisions();
 
     const moveLeft = keys['a'] || keys['ArrowLeft'];
     const moveRight = keys['d'] || keys['ArrowRight'];
@@ -514,6 +569,7 @@ function createNewPlatforms() {
         });
 
         monsters.push(createMonster(newPlatform));
+        createBomb(newPlatform);
     }
 
     for (let i = platforms.length - 1; i >= 0; i--) {
@@ -527,6 +583,10 @@ function createNewPlatforms() {
     }
     for (let i = monsters.length - 1; i >= 0; i--) {
         if (!platforms.includes(monsters[i].platform)) monsters.splice(i, 1);
+    }
+    for (let i = bombs.length - 1; i >= 0; i--) {
+        if (bombs[i].platform.y > canvas.height) bombs.splice(i, 1);
+
     }
 }
 
@@ -589,6 +649,12 @@ function drawMonsters() {
     }
 }
 
+function drawBombs() {
+    for (let bomb of bombs) {
+        ctx.drawImage(bombImg, 0, 0, 128, 128, bomb.x, bomb.y, bomb.width, bomb.height);
+    }
+}
+
 function drawGameOver() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -622,6 +688,7 @@ function draw() {
     }
 
     drawMonsters();
+    drawBombs();
 
     if (invulnerableTimer % 6 < 3) {
         const frameWidth = knightImg.width / 6;
